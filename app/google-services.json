@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "217314756719",
+    "project_id": "dogizzy-3ab60",
+    "storage_bucket": "dogizzy-3ab60.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:217314756719:android:fc0260b9ed02af50b0a59a",
+        "android_client_info": {
+          "package_name": "com.example.dogizzy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "217314756719-8a7pu5qj1dp0cqiltru2oi9o5to6rkan.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dogizzy",
+            "certificate_hash": "e233263d0b7ecac5bc0c7138a970df9f2d79bbac"
+          }
+        },
+        {
+          "client_id": "217314756719-akpg371dsej9dvbttr39k64ajsstt4g4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAo-4qyKCn25Tp9bOFpi4xvGmTa1DxFZ78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "217314756719-akpg371dsej9dvbttr39k64ajsstt4g4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
