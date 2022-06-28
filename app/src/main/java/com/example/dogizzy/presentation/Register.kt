@@ -77,7 +77,8 @@ fun Registro(navController: NavHostController) {
                     backgroundColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                    disabledIndicatorColor = Color.Transparent,
+                    textColor = Color.Black
                 ),
                 modifier = Modifier
                     .width(251.dp)
@@ -101,7 +102,8 @@ fun Registro(navController: NavHostController) {
                     backgroundColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                    disabledIndicatorColor = Color.Transparent,
+                    textColor = Color.Black
                 ),
                 modifier = Modifier
                     .width(251.dp)
@@ -126,7 +128,8 @@ fun Registro(navController: NavHostController) {
                     backgroundColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                    disabledIndicatorColor = Color.Transparent,
+                    textColor = Color.Black
                 ),
                 modifier = Modifier
                     .width(251.dp)

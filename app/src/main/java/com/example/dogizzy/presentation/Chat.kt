@@ -2,6 +2,7 @@ package com.example.dogizzy.presentation
 
 import android.graphics.drawable.Drawable
 import android.media.Image
+import android.net.Uri
 import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.example.dogizzy.BottomNavigation
 import com.example.dogizzy.R
 import com.example.dogizzy.model.Response
@@ -48,6 +50,10 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 
 @OptIn(
@@ -119,7 +125,7 @@ fun Chat(navController: NavHostController) {
 
 @Composable
 //Aquí el estilo del perfil (el de figma)
-fun ChatListItem(perfil: String, foto: Int, ultimoMsg: String, onItemClick: (String) -> Unit) {
+fun ChatListItem(perfil: String, foto: String, ultimoMsg: String, onItemClick: (String) -> Unit) {
     Row(
         modifier = Modifier
             .clickable(onClick = { onItemClick(perfil) })
@@ -129,7 +135,7 @@ fun ChatListItem(perfil: String, foto: Int, ultimoMsg: String, onItemClick: (Str
     ) {
         Image(
             //Aqui poner la foto de cada uno según la base de datos
-            painter = painterResource(foto),
+            painter = rememberAsyncImagePainter(foto),
             contentDescription = "avatar",
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -153,9 +159,12 @@ fun ChatListItem(perfil: String, foto: Int, ultimoMsg: String, onItemClick: (Str
 }
 
 @Composable
-fun ListaChats(navController: NavHostController, busqueda: String, usersViewModel: UsersViewModel = viewModel(factory = UsersViewModelFactory(UsersRepo()))) {
+fun ListaChats(navController: NavHostController, busqueda: String, chatViewModel: ChatViewModel = viewModel(), usersViewModel: UsersViewModel = viewModel(factory = UsersViewModelFactory(UsersRepo()))) {
     val perfiles = rememberSaveable { mutableSetOf<String>() }
     val nombre = rememberSaveable { mutableSetOf<String>() }
+    val fotos = rememberSaveable { mutableSetOf<String>() }
+    val ult = rememberSaveable { mutableSetOf<String>() }
+
 
     var infoRecieved = false
 
@@ -169,6 +178,8 @@ fun ListaChats(navController: NavHostController, busqueda: String, usersViewMode
             userInfo.data?.forEach {
                 Log.d("chats", it.id)
                 perfiles.add(it.id)
+
+
                 when (val userInfo =
                     usersViewModel.getUserDetails(it.id).collectAsState(initial = null).value) {
 
@@ -178,12 +189,37 @@ fun ListaChats(navController: NavHostController, busqueda: String, usersViewMode
 
                     is Response.Success -> {
                         //Aquí seria sacar la foto, el nombre y el último msg (Habría que hacer otra función)
+                        val profileRef = storageRef.child("profilePics/" + it.id + "/foto")
+                        profileRef.downloadUrl.addOnSuccessListener {
+                            fotos.add(it.toString())
+                        }.addOnFailureListener{
+                            fotos.add(R.drawable.defaultprofile.toString())
+                        }
+
+                        val mensajes = chatViewModel.getMessages(it.id)
+
+                        val message: String by chatViewModel.message.observeAsState(initial = "")
+                        val messages: List<Map<String, Any>> by chatViewModel.messages.observeAsState(
+                            initial = emptyList<Map<String, Any>>().toMutableList()
+                        )
+
+                        if(messages.isNotEmpty())
+                            messages.last()[Constants.MESSAGE].toString()
+
                         userInfo.data?.forEach {
                             if(it.key == "Nombre")
                                 nombre.add(it.value.toString())
 
                         }
-                        infoRecieved = true
+                        Log.d("PERFILES", perfiles.size.toString())
+                        Log.d("FOTOS", fotos.size.toString())
+                        when(perfiles.size == fotos.size && fotos.size == ult.size){
+                            true -> {
+                                Log.d("Fotos", fotos.toString())
+                                Log.d("Ultimos", ult.toString())
+                                infoRecieved = true
+                            }
+                        }
                     }
                 }
             }
@@ -209,8 +245,8 @@ fun ListaChats(navController: NavHostController, busqueda: String, usersViewMode
                             perfilesFiltrados.forEach {
                                 ChatListItem(
                                     perfil = it,
-                                    foto = R.drawable.shiba,
-                                    ultimoMsg = "Último msg",
+                                    foto = fotos.toList()[perfilesFiltrados.indexOf(it)],
+                                    ultimoMsg = if(ult.isEmpty()) "" else ult.toList()[perfilesFiltrados.indexOf(it)],
                                     //Quiza poner it?
                                     onItemClick = {
                                         //CONDICIÓN PARA RELACIONAR CHAT CON SU ID
@@ -268,6 +304,19 @@ fun ChatScreen(chatViewModel: ChatViewModel = viewModel(), perfilUID: String, us
                 }
 
                 //Algo para la imagen
+                val imageUri = rememberSaveable { mutableStateOf("") }
+                val painter = rememberAsyncImagePainter(
+                    if (imageUri.value.isEmpty())
+                        R.drawable.defaultprofile//Placeholder
+                    else
+                        imageUri.value
+                )
+
+
+                val profileRef = storageRef.child("profilePics/" + perfilUID + "/foto")
+                profileRef.downloadUrl.addOnSuccessListener {
+                    imageUri.value = it.toString()
+                }
 
                 //Lista de mensajes
                 Column(

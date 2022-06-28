@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.example.dogizzy.BottomNavigation
 import com.example.dogizzy.R
 import com.example.dogizzy.model.Response
@@ -147,13 +149,26 @@ fun Main(navController: NavHostController, usersViewModel: UsersViewModel = view
                                             .size(width = 175.dp, height = 250.dp),
                                         containerColor = MaterialTheme.colorScheme.onSurface
                                     ){
+                                        val imageUri = rememberSaveable { mutableStateOf("") }
+                                        val painter = rememberAsyncImagePainter(
+                                            if (imageUri.value.isEmpty())
+                                                R.drawable.defaultprofile//Placeholder
+                                            else
+                                                imageUri.value
+                                        )
+
+
+                                        val profileRef = storageRef.child("profilePics/" + it.key + "/foto")
+                                        profileRef.downloadUrl.addOnSuccessListener {
+                                            imageUri.value = it.toString()
+                                        }
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier.padding(top = 25.dp, start = 15.dp)
                                         ){
                                             Image(
                                                 //Fotos de los usuarios sugeridos
-                                                painter = painterResource(R.drawable.shiba),
+                                                painter = painter,
                                                 contentDescription = "avatar",
                                                 contentScale = ContentScale.Crop,
                                                 modifier = Modifier

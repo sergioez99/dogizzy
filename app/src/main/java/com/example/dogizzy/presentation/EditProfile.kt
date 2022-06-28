@@ -181,7 +181,6 @@ fun editProfileBody(navController: NavHostController, foto: String, usersViewMod
                         edad = it
                     }
                 },
-                visualTransformation = MaskVisualTransformation(DATE_MASK),
                 label = { (Text("Edad", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)) },
                 colors = TextFieldDefaults.textFieldColors(
                     textColor = MaterialTheme.colorScheme.surface,

@@ -109,9 +109,17 @@ class UsersRepo {
 
     }
 
+    fun getUserProfilePic() = callbackFlow {
+        storageRef.child("profileImages/" + auth.currentUser?.uid + "/foto").downloadUrl
+            .addOnSuccessListener {
+                trySend(it)
+            }
+        awaitClose()
+    }
+
     fun setUserPhotos(foto: String){
         if(foto.isNotEmpty()){
-            val fileRef = storageRef.child("profileImages/" + auth.currentUser?.uid + "/foto")
+            val fileRef = storageRef.child("profileImages/" + auth.currentUser?.uid + foto)
             fileRef.putFile(foto.toUri()).addOnFailureListener{
                Log.d("No ha subido la foto", "")
             }
