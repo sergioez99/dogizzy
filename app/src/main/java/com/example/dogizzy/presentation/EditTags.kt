@@ -55,6 +55,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +82,11 @@ fun editTags(navController: NavHostController, usersViewModel: UsersViewModel = 
             }
         }
 
+        var name = ""
+        var city = ""
+        var edad = ""
+        var bio = ""
+
         when (val userInfo = usersViewModel.getUserDetails(auth.currentUser?.uid).collectAsState(initial = null).value) {
 
             is Response.Error -> {
@@ -88,6 +96,18 @@ fun editTags(navController: NavHostController, usersViewModel: UsersViewModel = 
 
             is Response.Success -> {
                 userInfo.data?.forEach {
+                    if (it.key == "Nombre"){
+                        name = it.value.toString()
+                    }
+                    if (it.key == "Edad"){
+                        edad = it.value.toString()
+                    }
+                    if (it.key == "Ciudad"){
+                        city = it.value.toString()
+                    }
+                    if (it.key == "Bio"){
+                        bio = it.value.toString()
+                    }
                     if (it.key == "Tags") {
                         list = it.value as MutableList<String>
                         if(tags.isEmpty()){
@@ -112,6 +132,20 @@ fun editTags(navController: NavHostController, usersViewModel: UsersViewModel = 
 
 
                 Row(){
+                    Box(modifier = Modifier.padding(top = 10.dp, start = 10.dp)){
+                        Image(
+                            painter = rememberAsyncImagePainter(R.drawable.goback),
+                            contentDescription = "hanachan",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clickable {
+                                    navController.navigate("perfil") {
+                                        popUpTo("edit_tags")
+                                    }
+                                }
+                        )
+                    }
                     Text(text = "Tus intereses",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.surface,
@@ -211,10 +245,39 @@ fun editTags(navController: NavHostController, usersViewModel: UsersViewModel = 
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
-                    var success by remember { mutableStateOf("")}
                     androidx.compose.material.Button(
                         onClick = {
+                            Firebase.auth.currentUser?.uid?.let {
+                                Firebase.firestore.collection("users").document(it).set(
+                                    hashMapOf(
+                                        "Nombre" to name,
+                                        "Ciudad" to city,
+                                        "Edad" to edad,
+                                        "Bio" to bio,
+                                        "Tags" to tags
+                                    )
+                                ).addOnSuccessListener {
+                                    Toast.makeText(
+                                        context,
+                                        "Tu perfil se ha actualizado correctamente",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    navController.navigate("perfil"){
+                                        popUpTo("main")
+                                    }
+                                }
+                                    .addOnFailureListener{
+                                        Toast.makeText(
+                                            context,
+                                            "Tu perfil no se ha podido actualizar, intentalo de nuevo",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        navController.navigate("perfil"){
+                                            popUpTo("main")
+                                        }
+                                    }
 
+                            }
                         },
                         modifier = Modifier
                             .width(230.dp)
@@ -227,20 +290,6 @@ fun editTags(navController: NavHostController, usersViewModel: UsersViewModel = 
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.displaySmall
                         )
-                    }
-                    if(success == "true"){
-                        Toast.makeText(
-                            context,
-                            "Tu perfil se ha actualizado correctamente",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    if(success == "false"){
-                        Toast.makeText(
-                            context,
-                            "Tu perfil no se ha podido actualizar, intentalo de nuevo",
-                            Toast.LENGTH_SHORT
-                        ).show()
                     }
                 }
             }

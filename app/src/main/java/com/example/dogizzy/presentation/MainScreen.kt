@@ -71,7 +71,7 @@ fun Main(navController: NavHostController, usersViewModel: UsersViewModel = view
         val ciudad = mutableListOf<String>()
         val edades = mutableMapOf<String, String>()
         val ciudades = mutableMapOf<String, String>()
-        val tags = mutableSetOf<Set<String>>()
+        val tags = mutableListOf<Set<String>>()
         val tags_uid = mutableSetOf<String>()
         var ciudad_uid = ""
         var list = listOf("")
@@ -210,10 +210,14 @@ fun Main(navController: NavHostController, usersViewModel: UsersViewModel = view
 }
 
 @Composable
-fun algoritmo_comparacion(tags: Set<Set<String>>, ciudad: List<String>, tags_uid: Set<String>, ciudad_uid: String, ids: Set<String>): Map<String, Int> {
+fun algoritmo_comparacion(tags: List<Set<String>>, ciudad: List<String>, tags_uid: Set<String>, ciudad_uid: String, ids: Set<String>): Map<String, Int> {
     var similaridad = 0
     val lista_similares = mutableListOf<Int>()
     val lista_ids_valores = mutableMapOf<String, Int>()
+
+    Log.d("Tag list", tags.toString())
+    Log.d("Tag list sizedebe ser 7", tags.size.toString())
+    Log.d("Id list??", ids.toString())
 
     //Comparar si tienen los mismos tags y si la ciudad es la misma (pero tienen q estar escritas iguales uf)
     for((index, tag_list) in tags.withIndex()){

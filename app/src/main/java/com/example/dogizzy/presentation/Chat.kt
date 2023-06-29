@@ -179,7 +179,6 @@ fun ListaChats(navController: NavHostController, busqueda: String, chatViewModel
                 Log.d("chats", it.id)
                 perfiles.add(it.id)
 
-
                 when (val userInfo =
                     usersViewModel.getUserDetails(it.id).collectAsState(initial = null).value) {
 

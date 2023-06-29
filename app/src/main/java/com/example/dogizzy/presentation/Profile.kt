@@ -133,11 +133,15 @@ fun ProfilePic(perfil: String?) {
         else
             imageUri.value
     )
+    val downloaded = remember { mutableStateOf(false) }
 
-    //Coger la profile pic de la base de datos
-    val profileRef = storageRef.child("profilePics/" + perfil + "/foto")
-    profileRef.downloadUrl.addOnSuccessListener {
-        imageUri.value = it.toString()
+    if(!downloaded.value) {
+        //Coger la profile pic de la base de datos
+        val profileRef = storageRef.child("profilePics/" + perfil + "/foto")
+        profileRef.downloadUrl.addOnSuccessListener {
+            imageUri.value = it.toString()
+            downloaded.value = true
+        }
     }
 
     Image(
@@ -158,93 +162,97 @@ fun ProfileInfo(navController: NavHostController, perfil: String?, usersViewMode
     var nombre by rememberSaveable { mutableStateOf("") }
     var ciudad by rememberSaveable { mutableStateOf("") }
     var edad by rememberSaveable { mutableStateOf("") }
+    var downloaded = remember { mutableStateOf(false) }
 
-    when (val userInfo = usersViewModel.getUserDetails(perfil).collectAsState(initial = null).value) {
+    if(!downloaded.value){
+        when (val userInfo = usersViewModel.getUserDetails(perfil).collectAsState(initial = null).value) {
 
-        is Response.Error -> {
-            Log.d("No existe el documento", userInfo.toString())
-        }
-
-        is Response.Success -> {
-            userInfo.data?.forEach() {
-                if(it.key == "Nombre") {
-                    nombre = it.value.toString()
-                }
-                if(it.key == "Ciudad") {
-                    ciudad = it.value.toString()
-
-                }
-                if(it.key == "Edad") {
-                    edad = it.value.toString()
-
-                }
+            is Response.Error -> {
+                Log.d("No existe el documento", userInfo.toString())
             }
 
-            Text(
-                text = nombre,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 15.dp, start = 115.dp)
-            )
-            Text(
-                text = ciudad,
-                style = MaterialTheme.typography.displaySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 40.dp, start = 115.dp)
-            )
-            Text(
-                text = edad,
-                style = MaterialTheme.typography.displaySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 60.dp, start = 115.dp)
-            )
+            is Response.Success -> {
+                userInfo.data?.forEach() {
+                    if(it.key == "Nombre") {
+                        nombre = it.value.toString()
+                    }
+                    if(it.key == "Ciudad") {
+                        ciudad = it.value.toString()
 
-            // Boton chat o boton config
-            if(perfil != auth.currentUser?.uid){
-                Card(shape = CircleShape,
-                    modifier = Modifier
-                        .padding(top = 70.dp, start = 320.dp),
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ){
-                    Image(
-                        //Aqui poner la foto de cada uno según la base de datos
-                        painter = painterResource(R.drawable.chatbubbles),
-                        contentDescription = "chat",
-                        contentScale = ContentScale.Inside,
-                        modifier = Modifier
-                            .size(30.dp)
-                            .clip(CircleShape)
-                            .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                            .clickable(onClick = { chatViewModel.crearChat(navController, perfil) })
-                    )
+                    }
+                    if(it.key == "Edad") {
+                        edad = it.value.toString()
+
+                    }
                 }
-            } else {
-                Box(modifier = Modifier.padding(start = 330.dp, top = 10.dp)){
-                    Image(
-                        painter = rememberAsyncImagePainter(R.drawable.whiteconfig),
-                        contentDescription = "config",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable(onClick = { navController.navigate("config") })
-                    )
-                }
-                val imageUri = "empty"
-                Box(modifier = Modifier.padding(top = 80.dp, start = 330.dp)){
-                    Image(
-                        painter = rememberAsyncImagePainter(R.drawable.pencil),
-                        contentDescription = "config",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable(onClick = { navController.navigate("edit/${imageUri}") })
-                    )
-                }
+                downloaded.value = true
             }
         }
     }
 
+    Text(
+        text = nombre,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(top = 15.dp, start = 115.dp)
+    )
+    Text(
+        text = ciudad,
+        style = MaterialTheme.typography.displaySmall,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(top = 40.dp, start = 115.dp)
+    )
+    Text(
+        text = edad,
+        style = MaterialTheme.typography.displaySmall,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(top = 60.dp, start = 115.dp)
+    )
+
+    // Boton chat o boton config
+    if(perfil != auth.currentUser?.uid){
+        Card(shape = CircleShape,
+            modifier = Modifier
+                .padding(top = 70.dp, start = 320.dp),
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ){
+            Image(
+                //Aqui poner la foto de cada uno según la base de datos
+                painter = painterResource(R.drawable.chatbubbles),
+                contentDescription = "chat",
+                contentScale = ContentScale.Inside,
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                    .clickable(onClick = { chatViewModel.crearChat(navController, perfil) })
+            )
+        }
+    } else {
+        Box(modifier = Modifier.padding(start = 330.dp, top = 10.dp)){
+            Image(
+                painter = rememberAsyncImagePainter(R.drawable.whiteconfig),
+                contentDescription = "config",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable(onClick = { navController.navigate("config") })
+            )
+        }
+        val imageUri = "empty"
+        Box(modifier = Modifier.padding(top = 80.dp, start = 330.dp)){
+            Image(
+                painter = rememberAsyncImagePainter(R.drawable.pencil),
+                contentDescription = "config",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable(onClick = { navController.navigate("edit/${imageUri}"){
+                    } })
+            )
+        }
+    }
 
 }
 
@@ -253,91 +261,98 @@ fun ProfileInfo(navController: NavHostController, perfil: String?, usersViewMode
 @Composable
 fun ProfileData(navController: NavHostController, perfil: String?, usersViewModel: UsersViewModel = viewModel(factory = UsersViewModelFactory(UsersRepo()))) {
 
+    Log.d("Me estoy ejecutando", "soy profile")
     var bio by rememberSaveable { mutableStateOf("") }
     //Lista de tags de la base de datos
     val tags = rememberSaveable { mutableSetOf("") }
     var list = listOf("")
+    var downloaded = remember { mutableStateOf(false) }
 
-    when (val userInfo = usersViewModel.getUserDetails(perfil).collectAsState(initial = null).value) {
+    if(!downloaded.value){
+        when (val userInfo = usersViewModel.getUserDetails(perfil).collectAsState(initial = null).value) {
 
-        is Response.Error -> {
-            Log.d("No existe el documento", userInfo.toString())
-        }
-
-        is Response.Success -> {
-            userInfo.data?.forEach {
-                if(it.key == "Bio") {
-                    bio = it.value.toString()
-                }
-                if(it.key == "Tags"){
-                    list = it.value as List<String>
-                    list.forEach{
-                        tags.add(it)
-                    }
-                    tags.remove("")
-                }
-
-            }
-            Text(text = "Sobre mi",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.padding(top = 15.dp, start = 15.dp)
-            )
-
-            Text(text = bio,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.padding(top = 10.dp, start = 15.dp)
-            )
-
-            Row(){
-                Text(text = "Intereses",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.padding(top = 20.dp, start = 15.dp)
-                )
-                Row(modifier = Modifier.padding(start = 10.dp, top = 20.dp)){
-                    if(perfil == auth.currentUser?.uid){
-                        Image(
-                            //Aqui poner la foto de cada uno según la base de datos
-                            painter = rememberAsyncImagePainter(R.drawable.pencilblack),
-                            contentDescription = "config",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clickable(onClick = { navController.navigate("edit_tags") })
-                        )
-                    }
-                }
+            is Response.Error -> {
+                Log.d("No existe el documento", userInfo.toString())
             }
 
-            SimpleFlowRow(
-                verticalGap = 1.dp,
-                horizontalGap = 1.dp,
-                alignment = Alignment.Start,
-                modifier = Modifier.padding(4.dp)
-            ) {
-                tags.forEach { tags ->
-                    //var color = tag.color
-                    Card(
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .padding(top = 10.dp, start = 15.dp),
-                        //Cambiar el color segun etiqueta? how
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.surface
-                    ) {
-                        Text(
-                            text = tags,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.surface,
-                            modifier = Modifier.padding(top = 5.dp, start = 15.dp, bottom = 5.dp, end = 15.dp)
-                        )
+            is Response.Success -> {
+                userInfo.data?.forEach {
+                    if(it.key == "Bio") {
+                        bio = it.value.toString()
                     }
+                    if(it.key == "Tags"){
+                        list = it.value as List<String>
+                        list.forEach{
+                            tags.add(it)
+                        }
+                        tags.remove("")
+                    }
+
                 }
+                downloaded.value = true
             }
         }
     }
+
+    Text(text = "Sobre mi",
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.padding(top = 15.dp, start = 15.dp)
+    )
+
+    Text(text = bio,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.padding(top = 10.dp, start = 15.dp)
+    )
+
+    Row(){
+        Text(text = "Intereses",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.padding(top = 20.dp, start = 15.dp)
+        )
+        Row(modifier = Modifier.padding(start = 10.dp, top = 20.dp)){
+            if(perfil == auth.currentUser?.uid){
+                Image(
+                    //Aqui poner la foto de cada uno según la base de datos
+                    painter = rememberAsyncImagePainter(R.drawable.pencilblack),
+                    contentDescription = "config",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable(onClick = { navController.navigate("edit_tags") })
+                )
+            }
+        }
+    }
+
+    SimpleFlowRow(
+        verticalGap = 1.dp,
+        horizontalGap = 1.dp,
+        alignment = Alignment.Start,
+        modifier = Modifier.padding(4.dp)
+    ) {
+        tags.forEach { tags ->
+            //var color = tag.color
+            Card(
+                shape = CircleShape,
+                modifier = Modifier
+                    .padding(top = 10.dp, start = 15.dp),
+                //Cambiar el color segun etiqueta? how
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.surface
+            ) {
+                Text(
+                    text = tags,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.padding(top = 5.dp, start = 15.dp, bottom = 5.dp, end = 15.dp)
+                )
+            }
+        }
+    }
+
 }
 
 
@@ -359,13 +374,13 @@ fun ProfileImages(navController: NavHostController, perfil: String?, usersViewMo
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(20.dp)
-                        .clickable(onClick = { navController.navigate("edit_photos") })
+                        .clickable(onClick = { navController.navigate("subir_fotos") })
                 )
             }
         }
     }
 
-    val foto = rememberSaveable { mutableSetOf<Uri>() }
+    val foto = remember { mutableSetOf<Uri>() }
     var showFoto = remember { mutableStateOf(EMPTY_IMAGE_URI)}
     val showDialog = remember { mutableStateOf(false) }
     if (showDialog.value) {
@@ -385,18 +400,27 @@ fun ProfileImages(navController: NavHostController, perfil: String?, usersViewMo
             }
         }
     }
+
+    var downloaded = remember { mutableStateOf(false) }
     
     SimpleFlowRow(
-        modifier = Modifier.padding(top = 15.dp)
+        modifier = Modifier.padding(top = 15.dp, start = 5.dp)
     ) {
-        when(val userPhotos = usersViewModel.getUserPhotos(perfil).collectAsState(initial = null).value){
+        if(!downloaded.value){
+            when(val userPhotos = usersViewModel.getUserPhotos(perfil).collectAsState(initial = null).value){
 
-            is ListResult -> {
-                userPhotos.items.forEach{
-                    it.downloadUrl.addOnSuccessListener {
-                        foto.add(it)
+                is ListResult -> {
+                    userPhotos.items.forEach{
+                        it.downloadUrl.addOnSuccessListener {
+                            foto.add(it)
+                        }
                     }
+                    downloaded.value = true
                 }
+            }
+        }
+        when (downloaded.value) {
+            true -> {
                 foto.forEach{
                     Image(
                         painter = rememberAsyncImagePainter(it),

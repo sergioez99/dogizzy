@@ -1,5 +1,8 @@
 package com.example.dogizzy.presentation
 
+import android.content.ContentResolver
+import android.content.res.Resources
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +24,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavHostController
+import com.example.dogizzy.R
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -189,6 +194,12 @@ fun Registro(navController: NavHostController) {
                                                 "Tags" to mutableListOf("Ponga aquí sus etiquetas")
                                             )
                                         )
+                                    }
+                                    var subida = false
+                                    val uri = ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.resources.getResourcePackageName(R.drawable.defaultprofile) + '/' + context.resources.getResourceTypeName(R.drawable.defaultprofile) + '/' + context.resources.getResourceEntryName(R.drawable.defaultprofile)
+                                    val fileRef = storageRef.child("profilePics/" + auth.currentUser?.uid + "/foto")
+                                    fileRef.putFile(Uri.parse(uri)).addOnSuccessListener {
+
                                     }
                                     Toast.makeText(
                                         context,

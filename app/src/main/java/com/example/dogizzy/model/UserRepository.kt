@@ -126,7 +126,7 @@ class UsersRepo {
         }
     }
 
-    fun setUserDetails(nombre: String, edad: String, ciudad: String, descripcion: String, foto: String, name: String, age: String, city: String, bio: String): String{
+    fun setUserDetails(nombre: String, edad: String, ciudad: String, descripcion: String, foto: String, name: String, age: String, city: String, bio: String, tags: List<String>): String{
         var success = "true"
 
         //Foto
@@ -136,53 +136,78 @@ class UsersRepo {
                 success = "false"
             }
         }
+        var changeName = name
+        var changeCity = city
+        var changeEdad = age
+        var changeBio = bio
+
+        var nt = false
+        var ct = false
+        var et = false
 
         //Datos del perfil
         if(success == "true"){
             Firebase.auth.currentUser?.uid?.let {
                 if(nombre.isNotEmpty()){
-                    Firebase.firestore.collection("users").document(it).collection("perfil").document("nombre").set(
+                    Firebase.firestore.collection("users").document(it).set(
                         hashMapOf(
                             "Nombre" to nombre,
-                            "Ciudad" to city,
-                            "Edad" to age,
-                            "Bio" to bio
+                            "Ciudad" to changeCity,
+                            "Edad" to changeEdad,
+                            "Bio" to changeBio,
+                            "Tags" to tags
                         )
-                    ).addOnFailureListener{
+                    ).addOnSuccessListener {
+                        Log.d("Entras aqui?", "o no")
+                        nt = true
+                    }.addOnFailureListener{
                         success = "false"
                     }
                 }
+                if(nt) changeName = nombre
                 if(ciudad.isNotEmpty()){
-                    Firebase.firestore.collection("users").document(it).collection("perfil").document("ciudad").set(
+                    Log.d("NT", nt.toString())
+                    Firebase.firestore.collection("users").document(it).set(
                         hashMapOf(
-                            "Nombre" to name,
+                            "Nombre" to changeName,
                             "Ciudad" to ciudad,
-                            "Edad" to age,
-                            "Bio" to bio
+                            "Edad" to changeEdad,
+                            "Bio" to changeBio,
+                            "Tags" to tags
                         )
-                    ).addOnFailureListener{
+                    ).addOnSuccessListener {
+                        ct = true
+                    }.addOnFailureListener{
                         success = "false"
                     }
                 }
+                if(ct) changeCity = ciudad
                 if(edad.isNotEmpty()){
-                    Firebase.firestore.collection("users").document(it).collection("perfil").document("edad").set(
+                    Log.d("CT", ct.toString())
+                    Firebase.firestore.collection("users").document(it).set(
                         hashMapOf(
-                            "Nombre" to name,
-                            "Ciudad" to city,
+                            "Nombre" to changeName,
+                            "Ciudad" to changeCity,
                             "Edad" to edad,
-                            "Bio" to bio
+                            "Bio" to changeBio,
+                            "Tags" to tags
                         )
-                    ).addOnFailureListener{
+                    ).addOnSuccessListener {
+                        et = true
+                    }.addOnFailureListener{
                         success = "false"
                     }
                 }
+                if(et) changeEdad = edad
                 if(descripcion.isNotEmpty()){
-                    Firebase.firestore.collection("users").document(it).collection("perfil").document("descripcion").set(
+                    Log.d("ET", et.toString())
+                    Firebase.firestore.collection("users").document(it).set(
                         hashMapOf(
-                            "Nombre" to name,
-                            "Ciudad" to city,
-                            "Edad" to age,
-                            "Bio" to descripcion
+                            "Nombre" to changeName,
+                            "Ciudad" to changeCity,
+                            "Edad" to changeEdad,
+                            "Bio" to descripcion,
+                            "Tags" to tags
                         )
                     ).addOnFailureListener{
                         success = "false"
@@ -202,7 +227,7 @@ class UsersViewModel(val usersRepo: UsersRepo): ViewModel() {
     fun getAllUsers() = usersRepo.getAllUsers()
     fun getAllChats() = usersRepo.getAllChats()
     fun getUserPhotos(perfil: String?) = usersRepo.getUserPhotos(perfil)
-    fun setUserDetails(nombre: String, edad: String, ciudad: String, descripcion: String, foto: String, name: String, age: String, city: String, bio: String) = usersRepo.setUserDetails(nombre, edad, ciudad, descripcion, foto, name, age, city, bio)
+    fun setUserDetails(nombre: String, edad: String, ciudad: String, descripcion: String, foto: String, name: String, age: String, city: String, bio: String, tags: List<String>) = usersRepo.setUserDetails(nombre, edad, ciudad, descripcion, foto, name, age, city, bio, tags)
     fun setUserPhotos(foto: String) = usersRepo.setUserPhotos(foto)
 }
 

@@ -9,10 +9,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +46,7 @@ fun CameraActivity(navController: NavHostController, modifier: Modifier = Modifi
             )
             Button(
                 modifier = Modifier.align(Alignment.BottomStart),
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.onSecondary),
                 onClick = {
                     imageUri = EMPTY_IMAGE_URI
                 }
@@ -56,12 +55,18 @@ fun CameraActivity(navController: NavHostController, modifier: Modifier = Modifi
             }
             Button(
                 modifier = Modifier.align(Alignment.BottomEnd),
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.onSecondary),
                 onClick = {
                     val encodedUrl = URLEncoder.encode(imageUri.toString(), StandardCharsets.UTF_8.toString())
                     if(id == "edit")
-                        navController.navigate("edit/${encodedUrl}")
-                    else
-                        navController.navigate("uploadFoto/${encodedUrl}")
+                        navController.navigate("edit/${encodedUrl}"){
+                            popUpTo("main")
+                        }
+                    else{
+                        navController.navigate("uploadFoto/${encodedUrl}"){
+                            popUpTo("main")
+                        }
+                    }
                 }
             ) {
                 Text("Guardar foto")
@@ -89,11 +94,12 @@ fun CameraActivity(navController: NavHostController, modifier: Modifier = Modifi
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(4.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.onSecondary),
                     onClick = {
                         showGallerySelect = true
                     }
                 ) {
-                    Text("Select from Gallery")
+                    Text("Galería")
                 }
             }
         }

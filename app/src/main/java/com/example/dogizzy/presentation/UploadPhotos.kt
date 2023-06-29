@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import com.example.dogizzy.presentation.components.SimpleFlowRow
+import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ListResult
 
 @SuppressLint("MutableCollectionMutableState")
@@ -57,14 +58,40 @@ fun subirFotos(navController: NavHostController, usersViewModel: UsersViewModel 
             items(1) {
                 val foto = rememberSaveable { mutableStateOf(mutableSetOf<Uri>()) }
 
-                Text(text = "Tus imágenes",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.padding(top = 10.dp, start = 15.dp)
-                )
+                Column(){
+                    Row(){
+                        Box(modifier = Modifier.padding(top = 10.dp, start = 15.dp)){
+                            Image(
+                                painter = rememberAsyncImagePainter(R.drawable.goback),
+                                contentDescription = "hanachan",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .clickable {
+                                        navController.navigate("perfil") {
+                                            popUpTo("subir_fotos")
+                                        }
+                                    }
+                            )
+                        }
+                        Text(text = "Tus imágenes",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.surface,
+                            modifier = Modifier.padding(top = 10.dp, start = 15.dp)
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically){
+                        Text(text = "Seleccione una imagen para borrarla",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.surface,
+                            modifier = Modifier.padding(top = 10.dp, start = 15.dp)
+                        )
+                    }
+                }
+
 
                 SimpleFlowRow(
-                    modifier = Modifier.padding(top = 15.dp)
+                    modifier = Modifier.padding(top = 15.dp, start = 5.dp)
                 ) {
                     when(val userPhotos = usersViewModel.getUserPhotos(auth.currentUser?.uid).collectAsState(initial = null).value){
 
@@ -74,14 +101,27 @@ fun subirFotos(navController: NavHostController, usersViewModel: UsersViewModel 
                                     foto.value.add(it)
                                 }
                             }
-                            foto.value.forEach{
+                            Log.d("Display todas las fotos", "")
+                            foto.value.forEach{ uri ->
                                 Image(
-                                    painter = rememberAsyncImagePainter(it),
+                                    painter = rememberAsyncImagePainter(uri),
                                     contentDescription = "hanachan",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(128.dp)
-                                        .clickable { borrarFoto(it, foto) }
+                                        .clickable {
+                                            Log.d("Borro foto", uri.toString())
+                                            FirebaseStorage
+                                                .getInstance()
+                                                .getReferenceFromUrl(uri.toString())
+                                                .delete()
+                                                .addOnSuccessListener {
+                                                    foto.value.remove(uri)
+                                                }
+                                                .addOnFailureListener {
+                                                    Log.d("No se ha borrado lafoto", "")
+                                                }
+                                        }
                                 )
                             }
                             Image(
@@ -101,22 +141,25 @@ fun subirFotos(navController: NavHostController, usersViewModel: UsersViewModel 
     }
 }
 
-fun borrarFoto(foto: Uri, list:  MutableState<MutableSet<Uri>>){
 
-    storageRef.child(foto.toString()).delete().addOnSuccessListener {
-        list.value.remove(foto)
-    }.addOnFailureListener{
-        Log.d("No se ha borrado lafoto", "")
-    }
-}
-
+@Composable
 fun uploadFoto(navController: NavHostController, foto: String){
 
-    val fileRef = storageRef.child("profileImages/" + auth.currentUser?.uid + "/" + foto)
-    fileRef.putFile(foto.toUri()).addOnSuccessListener {
-        navController.navigate("subir_fotos")
-    }.addOnFailureListener{
-        Log.d("No se ha subido la foto", "")
+    val done = remember { mutableStateOf(false) }
+
+    Log.d("Subiendo foto", "")
+
+    val random = java.util.UUID.randomUUID().toString()
+
+    if(!done.value){
+        done.value = true
+        val fileRef = storageRef.child("profileImages/" + auth.currentUser?.uid + "/" + random)
+        fileRef.putFile(foto.toUri()).addOnSuccessListener {
+            Log.d("Se ha subido la foto", "foti")
+            navController.navigate("subir_fotos")
+        }.addOnFailureListener{
+            Log.d("No se ha subido la foto", "")
+        }
     }
 
 }
