@@ -14,8 +14,4 @@ Dogizzy es una red social que ayuda a conocer a otros dueños de mascotas canina
 
 Al ser una demo, dogizzy no llegó a publicarse en ningún repositorio de aplicaciones (App Store, Play Store), por lo que he grabado un video demostración del funcionamento de la aplicación📱 🎥 :
 
-<figure class="video_container">
-  <video controls="true" allowfullscreen="true" poster="/dogizzy/paws.png">
-    <source src="/dogizzy/dogizzy-demo-video.mp4" type="video/mp4">
-  </video>
-</figure>
+[![Dogizzy demo video](/dogizzy/paws.png)](/dogizzy/dogizzy-demo-video.mp4)
