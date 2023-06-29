@@ -16,4 +16,4 @@ Para más detalles sobre el desarrollo y la producción del proyecto podeis mira
 
 Al ser una demo, dogizzy no llegó a publicarse en ningún repositorio de aplicaciones (App Store, Play Store), por lo que he grabado un video demostración del funcionamento de la aplicación📱 🎥 :
 
-[![Dogizzy demo video](https://imgur.com/a/nVjzzyd)](https://youtu.be/cAsmXtMCg1I)
+[![Dogizzy demo video](https://img.youtube.com/vi/cAsmXtMCg1I/maxresdefault.jpg)](https://youtu.be/cAsmXtMCg1I)
